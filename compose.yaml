@@ -1,0 +1,8 @@
+services:
+  web:
+    build: .
+    image: contextual-companion
+    container_name: contextual-companion
+    ports:
+      - "8080:80"
+    restart: unless-stopped

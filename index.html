@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Compagnon contextuel — démo de défilement</title>
+  <meta name="description" content="Démo du motif Compagnon contextuel : un compagnon reste à l'écran pendant le défilement et affiche un élément contextuel différent selon la section active.">
+  <!-- `?v=` : à changer à chaque fois qu'on modifie l'un des deux
+       fichiers. La version entre dans l'URL, donc un vieux cache ne peut
+       plus être associé au nouveau HTML. -->
+  <link rel="stylesheet" href="css/style.css?v=10">
+  <noscript><style>.companion, .scroll-cue { display: none; }</style></noscript>
+</head>
+<body>
+
+  <!-- ── Section d'ouverture ───────────────────────────────── -->
+  <header class="hero">
+    <div class="hero__inner">
+      <p class="hero__eyebrow">Démonstration</p>
+      <h1 class="hero__title">Compagnon contextuel</h1>
+      <p class="hero__subtitle">
+        Un compagnon reste à l'écran pendant que vous descendez, et change de contenu
+        selon la section que vous lisez. Défilement natif, aucune interception.
+      </p>
+
+      <div class="hero__visual" aria-hidden="true">
+        <span class="panel panel--back"></span>
+        <span class="panel panel--mid"></span>
+        <span class="panel panel--front">
+          <span class="panel__text">
+            <span class="panel__bar"></span>
+            <span class="panel__bar"></span>
+            <span class="panel__bar panel__bar--short"></span>
+            <span class="panel__bar panel__bar--short"></span>
+            <span class="panel__bar panel__bar--short"></span>
+          </span>
+          <span class="panel__companion"></span>
+        </span>
+      </div>
+    </div>
+
+    <a class="scroll-cue" href="#photo">
+      <span class="scroll-cue__mouse" aria-hidden="true"><span class="scroll-cue__dot"></span></span>
+      <span class="scroll-cue__label">Défiler</span>
+    </a>
+  </header>
+
+  <!-- ── Compagnon et sections empilées ────────────────────── -->
+  <div class="layout">
+
+    <aside class="companion" aria-label="Compagnon contextuel">
+      <p class="companion__label">Compagnon</p>
+
+      <div class="companion__stage" aria-live="polite" aria-atomic="true">
+
+        <article class="view" data-view="photo" aria-hidden="true">
+          <div class="photo" role="img" aria-label="Emplacement photo factice, format 4 sur 3"></div>
+          <p class="view__caption">Légende factice — le visuel voyage dans le compagnon.</p>
+        </article>
+
+        <article class="view" data-view="quiz" aria-hidden="true">
+          <p class="view__kicker">Question 1 / 3</p>
+          <p class="view__question">Question factice : que fait le compagnon&nbsp;?</p>
+          <ul class="choices">
+            <li><button class="choice" type="button" aria-pressed="false">Il reste identique</button></li>
+            <li><button class="choice" type="button" aria-pressed="false">Il change selon la section</button></li>
+            <li><button class="choice" type="button" aria-pressed="false">Il disparaît au défilement</button></li>
+          </ul>
+        </article>
+
+        <article class="view" data-view="video" aria-hidden="true">
+          <div class="player" role="img" aria-label="Lecteur vidéo factice, durée 3 minutes 24">
+            <span class="player__play" aria-hidden="true"></span>
+            <span class="player__timeline" aria-hidden="true"></span>
+            <span class="player__time" aria-hidden="true">0:00 / 3:24</span>
+          </div>
+          <p class="view__caption">Lecteur factice — aucun média réel n'est chargé.</p>
+        </article>
+
+        <article class="view" data-view="quote" aria-hidden="true">
+          <blockquote class="quote">
+            <p>Le compagnon suit la lecture&nbsp;: une seule vue active, un seul contexte à la fois.</p>
+            <footer>— Citation factice</footer>
+          </blockquote>
+        </article>
+
+        <article class="view" data-view="stats" aria-hidden="true">
+          <dl class="stats">
+            <div class="stat">
+              <dt>Seuil</dt>
+              <dd>24 %</dd>
+            </div>
+            <div class="stat">
+              <dt>Sections</dt>
+              <dd>6</dd>
+            </div>
+            <div class="stat">
+              <dt>Observateurs</dt>
+              <dd>1</dd>
+            </div>
+          </dl>
+        </article>
+
+        <article class="view" data-view="menu" aria-hidden="true">
+          <ul class="menu">
+            <li><button class="menu__item" type="button" aria-current="true">Sommaire</button></li>
+            <li><button class="menu__item" type="button" aria-current="false">Sections</button></li>
+            <li><button class="menu__item" type="button" aria-current="false">Compagnon</button></li>
+            <li><button class="menu__item" type="button" aria-current="false">Réglages</button></li>
+          </ul>
+          <p class="view__caption">Menu sans destination&nbsp;: le clic ne déplace rien.</p>
+        </article>
+
+      </div>
+    </aside>
+
+    <div class="flow">
+
+      <section class="section" id="photo">
+        <span class="marker" aria-hidden="true"></span>
+        <p class="section__kicker">Section 01</p>
+        <h2 class="section__title">Photo</h2>
+        <p class="section__leads">Cette section active le compagnon <strong>photo</strong>.</p>
+        <p class="section__body">
+          Texte factice. Il occupe la colonne de lecture et ne bouge jamais, afin que le
+          décalage avec le compagnon reste visible à l'œil. Rien de tout cela n'est réel&nbsp;:
+          chaque paragraphe n'existe que pour donner de la matière au défilement.
+        </p>
+        <p class="section__body">
+          Un second paragraphe de remplissage, volontairement long, pour que la section
+          dépasse la hauteur de l'écran et que la ligne de déclenchement soit franchie
+          plusieurs fois pendant son passage.
+        </p>
+      </section>
+
+      <section class="section" id="quiz">
+        <span class="marker" aria-hidden="true"></span>
+        <p class="section__kicker">Section 02</p>
+        <h2 class="section__title">Quiz</h2>
+        <!-- Sur téléphone, le compagnon accompagne sa section dans le
+             flux : la même carte, posée au-dessus du texte. Son contenu
+             n'est pas une `.view`, il ne dépend donc pas de la bascule. -->
+        <div class="companion companion--inline">
+          <p class="companion__label">Compagnon</p>
+          <div class="companion__stage">
+            <p class="view__kicker">Question 1 / 3</p>
+            <p class="view__question">Question factice : que fait le compagnon&nbsp;?</p>
+            <ul class="choices">
+              <li><button class="choice" type="button" aria-pressed="false">Il reste identique</button></li>
+              <li><button class="choice" type="button" aria-pressed="false">Il change selon la section</button></li>
+              <li><button class="choice" type="button" aria-pressed="false">Il disparaît au défilement</button></li>
+            </ul>
+          </div>
+        </div>
+        <p class="section__leads">Cette section active le compagnon <strong>quiz</strong>.</p>
+        <p class="section__body">
+          Texte factice. La question et les choix vivent dans le compagnon, ce qui laisse
+          la colonne de lecture entièrement disponible pour le texte courant. Texte de
+          remplissage pour empêcher la colonne de s'effondrer sur les grandes fenêtres.
+        </p>
+        <p class="section__body">
+          Les réponses ne sont ni stockées ni corrigées&nbsp;: c'est une maquette
+          d'interface, pas une fonctionnalité. Du texte de remplissage supplémentaire
+          afin que la section défile suffisamment longtemps.
+        </p>
+      </section>
+
+      <section class="section" id="video">
+        <span class="marker" aria-hidden="true"></span>
+        <p class="section__kicker">Section 03</p>
+        <h2 class="section__title">Vidéo</h2>
+        <!-- Sur téléphone, le compagnon accompagne sa section dans le
+             flux : la même carte, posée au-dessus du texte. Son contenu
+             n'est pas une `.view`, il ne dépend donc pas de la bascule. -->
+        <div class="companion companion--inline">
+          <p class="companion__label">Compagnon</p>
+          <div class="companion__stage">
+            <div class="player" role="img" aria-label="Lecteur vidéo factice, durée 3 minutes 24">
+              <span class="player__play" aria-hidden="true"></span>
+              <span class="player__timeline" aria-hidden="true"></span>
+              <span class="player__time" aria-hidden="true">0:00 / 3:24</span>
+            </div>
+            <p class="view__caption">Lecteur factice — aucun média réel n'est chargé.</p>
+          </div>
+        </div>
+        <p class="section__leads">Cette section active le compagnon <strong>vidéo</strong>.</p>
+        <p class="section__body">
+          Texte factice. Le lecteur est un dessin statique&nbsp;: pas de balise
+          <code>&lt;video&gt;</code>, pas de réseau, pas de contrôle de lecture. La maquette
+          permet de garder une hauteur de compagnon stable d'une vue à l'autre.
+        </p>
+        <p class="section__body">
+          Un peu plus de texte, toujours sans valeur éditoriale, uniquement là pour
+          allonger la section et rendre la transition de compagnon perceptible.
+        </p>
+      </section>
+
+      <section class="section" id="quote">
+        <span class="marker" aria-hidden="true"></span>
+        <p class="section__kicker">Section 04</p>
+        <h2 class="section__title">Citation</h2>
+        <!-- Sur téléphone, le compagnon accompagne sa section dans le
+             flux : la même carte, posée au-dessus du texte. Son contenu
+             n'est pas une `.view`, il ne dépend donc pas de la bascule. -->
+        <div class="companion companion--inline">
+          <p class="companion__label">Compagnon</p>
+          <div class="companion__stage">
+            <blockquote class="quote">
+              <p>Le compagnon suit la lecture&nbsp;: une seule vue active, un seul contexte à la fois.</p>
+              <footer>— Citation factice</footer>
+            </blockquote>
+          </div>
+        </div>
+        <p class="section__leads">Cette section active le compagnon <strong>citation</strong>.</p>
+        <p class="section__body">
+          Texte factice. L'encadré remplace le média et ancre la lecture sur une idée
+          forte. Texte de remplissage&nbsp;: aucune intention éditoriale, aucun auteur
+          réel, aucune citation réelle.
+        </p>
+        <p class="section__body">
+          Encore quelques lignes de remplissage afin que cette section occupe elle aussi
+          une bonne partie de la fenêtre pendant le défilement.
+        </p>
+      </section>
+
+      <section class="section" id="stats">
+        <span class="marker" aria-hidden="true"></span>
+        <p class="section__kicker">Section 05</p>
+        <h2 class="section__title">Chiffres</h2>
+        <!-- Sur téléphone, le compagnon accompagne sa section dans le
+             flux : la même carte, posée au-dessus du texte. Son contenu
+             n'est pas une `.view`, il ne dépend donc pas de la bascule. -->
+        <div class="companion companion--inline">
+          <p class="companion__label">Compagnon</p>
+          <div class="companion__stage">
+            <dl class="stats">
+              <div class="stat">
+                <dt>Seuil</dt>
+                <dd>24 %</dd>
+              </div>
+              <div class="stat">
+                <dt>Sections</dt>
+                <dd>6</dd>
+              </div>
+              <div class="stat">
+                <dt>Observateurs</dt>
+                <dd>1</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+        <p class="section__leads">Cette section active le compagnon <strong>chiffres</strong>.</p>
+        <p class="section__body">
+          Texte factice. Les trois chiffres sont des valeurs décoratives choisies pour
+          sembler plausibles au premier coup d'œil&nbsp;; aucun n'est calculé à partir
+          de la page ou du code.
+        </p>
+        <p class="section__body">
+          Le compagnon a changé de vue cinq fois sans jamais quitter l'écran ni interrompre
+          le défilement. Texte de remplissage, comme dans les autres sections.
+        </p>
+      </section>
+
+      <section class="section" id="menu">
+        <span class="marker" aria-hidden="true"></span>
+        <p class="section__kicker">Section 06</p>
+        <h2 class="section__title">Menu</h2>
+        <!-- Sur téléphone, le compagnon accompagne sa section dans le
+             flux : la même carte, posée au-dessus du texte. Son contenu
+             n'est pas une `.view`, il ne dépend donc pas de la bascule. -->
+        <div class="companion companion--inline">
+          <p class="companion__label">Compagnon</p>
+          <div class="companion__stage">
+            <ul class="menu">
+              <li><button class="menu__item" type="button" aria-current="true">Sommaire</button></li>
+              <li><button class="menu__item" type="button" aria-current="false">Sections</button></li>
+              <li><button class="menu__item" type="button" aria-current="false">Compagnon</button></li>
+              <li><button class="menu__item" type="button" aria-current="false">Réglages</button></li>
+            </ul>
+            <p class="view__caption">Menu sans destination&nbsp;: le clic ne déplace rien.</p>
+          </div>
+        </div>
+        <p class="section__leads">Cette section active le compagnon <strong>menu</strong>.</p>
+        <p class="section__body">
+          Texte factice. Les quatre entrées ne mènent nulle part&nbsp;: elles marquent une
+          position, à la manière des choix du quiz, et rien de plus. Aucun ancrage, aucune
+          route, aucun chargement.
+        </p>
+        <p class="section__body">
+          Dernière section de la démo. Le compagnon a changé de vue six fois&nbsp;: toujours
+          figé en colonne sur grand écran, toujours dans le flux de sa section sur téléphone.
+        </p>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="js/app.js?v=4"></script>
+</body>
+</html>

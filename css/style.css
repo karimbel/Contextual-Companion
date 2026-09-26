@@ -1,0 +1,698 @@
+/* ============================================================
+   Compagnon contextuel — démo de défilement
+   Section d'ouverture pleine page, puis une colonne de lecture
+   et un compagnon latéral figé qui change de vue.
+   Tablette et ordinateur : deux colonnes. Téléphone : une seule
+   colonne, le compagnon reste figé mais se pose en haut de l'écran.
+   ============================================================ */
+
+:root {
+  --bg: #0b1020;
+  --bg-soft: #111930;
+  --panel: #151d33;
+  --line: #263252;
+  --text: #e6ebf5;
+  --muted: #97a3be;
+  --accent: #6ea8fe;
+  --accent-2: #7ee0c0;
+
+  --radius: 14px;
+  --shell: 1180px;
+
+  /* Bande de détection, en % de la hauteur de la fenêtre.
+     Le passage dans cette bande déclenche le recalcul ; la bascule
+     n'a lieu qu'au franchissement de la ligne (24 %). */
+  --band-top: 24%;
+  --band-height: 4%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9em;
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 0.1em 0.35em;
+}
+
+/* ── Section d'ouverture ─────────────────────────────────── */
+
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1.5rem 7rem;
+  /* Écart sous l'en-tête. Une marge, pas du padding : le hero est centré
+     dans un `min-height: 100vh`, un remplissage plus grand serait
+     absorbé par la hauteur minimale au lieu de pousser la suite vers le
+     bas. L'icône de défilement reste à 2.5rem du bord, l'écart se crée
+     donc sous elle. */
+  margin-bottom: 3.5rem;
+  text-align: center;
+  background:
+    radial-gradient(60rem 40rem at 50% -10%, #1b2a55 0%, transparent 60%),
+    var(--bg);
+}
+
+.hero__inner {
+  max-width: 46rem;
+}
+
+.hero__eyebrow {
+  margin: 0 0 1rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+.hero__title {
+  margin: 0 0 1rem;
+  font-size: clamp(2.4rem, 7vw, 4.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.hero__subtitle {
+  margin: 0 auto;
+  max-width: 34rem;
+  color: var(--muted);
+  font-size: clamp(1rem, 2.2vw, 1.15rem);
+}
+
+/* Visuel décoratif : trois panneaux empilés, volontairement
+   abstraits — ce n'est ni une palette ni une roue. */
+.hero__visual {
+  position: relative;
+  width: min(20rem, 74vw);
+  height: 9.5rem;
+  margin: 3rem auto 0;
+}
+
+.panel {
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: linear-gradient(160deg, var(--panel), var(--bg-soft));
+}
+
+.panel--back {
+  transform: translateY(-1.35rem) scale(0.86);
+  opacity: 0.45;
+}
+
+.panel--mid {
+  transform: translateY(-0.65rem) scale(0.93);
+  opacity: 0.7;
+}
+
+/* Le panneau de devant figure la mise en page de la démo : la
+   colonne de lecture à gauche, le compagnon à droite. */
+.panel--front {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.4rem;
+  box-shadow: 0 1.5rem 3rem rgb(0 0 0 / 35%);
+  animation: float 7s ease-in-out infinite;
+}
+
+.panel__text {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+/* Le rectangle de droite symbolise le compagnon contextuel. */
+.panel__companion {
+  flex: 0 0 34%;
+  align-self: stretch;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgb(110 168 254 / 20%), rgb(126 224 192 / 10%));
+}
+
+.panel__bar {
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--line);
+}
+
+.panel__bar--short {
+  width: 55%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-0.55rem); }
+}
+
+/* ── Invitation à défiler ────────────────────────────────── */
+
+.scroll-cue {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  translate: -50% 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.scroll-cue__mouse {
+  display: block;
+  width: 1.5rem;
+  height: 2.4rem;
+  border: 1.5px solid var(--muted);
+  border-radius: 999px;
+  position: relative;
+}
+
+.scroll-cue__dot {
+  position: absolute;
+  top: 0.45rem;
+  left: 50%;
+  translate: -50% 0;
+  width: 0.25rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: var(--accent);
+  animation: wheel 1.8s ease-in-out infinite;
+}
+
+@keyframes wheel {
+  0%       { opacity: 0; translate: -50% -0.2rem; }
+  35%      { opacity: 1; }
+  70%      { opacity: 0; translate: -50% 0.75rem; }
+  100%     { opacity: 0; translate: -50% 0.75rem; }
+}
+
+.scroll-cue:hover,
+.scroll-cue:focus-visible {
+  color: var(--text);
+}
+
+/* ── Mise en page : compagnon + colonne de lecture ────────── */
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 400px);
+  gap: clamp(2rem, 5vw, 5rem);
+  max-width: var(--shell);
+  margin: 0 auto;
+  padding: 0 clamp(1.25rem, 4vw, 3rem) 25vh;
+}
+
+.companion {
+  grid-column: 2;
+  grid-row: 1;
+  position: sticky;
+  top: 2rem;
+  align-self: start;
+  max-height: calc(100vh - 4rem);
+  overflow: auto;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.1rem;
+}
+
+.companion__label {
+  margin: 0 0 0.9rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.companion__stage {
+  display: grid;
+}
+
+/* Les vues partagent la même cellule de grille. Les vues inactives
+   sont repliées à zéro hauteur : la cellule — donc le compagnon —
+   prend la hauteur de la seule vue active, sans jamais laisser de
+   vide sous les vues courtes (chiffres, citation) ni déborder. */
+.view {
+  grid-area: 1 / 1;
+  height: 0;
+  overflow: hidden;
+  background: var(--panel);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(0.6rem);
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease,
+    visibility 0s linear 0.3s;
+}
+
+.view.is-active {
+  height: auto;
+  overflow: visible;
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease,
+    visibility 0s;
+}
+
+.view__kicker {
+  margin: 0 0 0.4rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+.view__question {
+  margin: 0 0 0.9rem;
+  font-weight: 600;
+}
+
+.view__caption {
+  margin: 0.75rem 0 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+/* Emplacement photo */
+
+.photo {
+  aspect-ratio: 4 / 3;
+  border-radius: 10px;
+  border: 1px dashed var(--line);
+  background: repeating-linear-gradient(135deg, #1a2440 0 12px, #182138 12px 24px);
+}
+
+/* Choix du quiz */
+
+.choices {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.choice {
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--text);
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 0.55rem 0.75rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.choice:hover {
+  border-color: #3c4c78;
+}
+
+.choice[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: #1b2b4d;
+}
+
+/* ── Menu factice ─────────────────────────────────────────── */
+
+/* Les entrées marquent une position : pas de cadre tant qu'aucune
+   n'est courante, seulement une pastille. La bordure n'apparaît que
+   sur l'entrée courante, ce qui évite un empilement de boîtes. */
+.menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.menu__item {
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  padding: 0.5rem 0.7rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.menu__item::before {
+  content: "";
+  flex: none;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.menu__item:hover {
+  color: var(--text);
+  background: var(--bg-soft);
+}
+
+.menu__item[aria-current="true"] {
+  color: var(--text);
+  border-color: var(--accent);
+  background: #1b2b4d;
+}
+
+.menu__item[aria-current="true"]::before {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* Lecteur vidéo dessiné */
+
+.player {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #0d1428;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.player__play {
+  width: 0;
+  height: 0;
+  border-left: 1.15rem solid var(--text);
+  border-top: 0.7rem solid transparent;
+  border-bottom: 0.7rem solid transparent;
+  translate: 0.15rem 0;
+}
+
+.player__timeline {
+  position: absolute;
+  left: 0.7rem;
+  right: 0.7rem;
+  bottom: 0.7rem;
+  height: 0.2rem;
+  border-radius: 999px;
+  background: var(--line);
+}
+
+.player__timeline::after {
+  content: "";
+  display: block;
+  width: 22%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+}
+
+.player__time {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.7rem;
+  font-size: 0.7rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Encadré de citation */
+
+.quote {
+  margin: 0;
+  padding: 0.25rem 0 0.25rem 1rem;
+  border-left: 3px solid var(--accent-2);
+}
+
+.quote p {
+  margin: 0 0 0.6rem;
+  font-size: 1.02rem;
+  line-height: 1.5;
+}
+
+.quote footer {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* Chiffres clés */
+
+.stats {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+}
+
+.stat {
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.7rem 0.5rem;
+  text-align: center;
+}
+
+.stat dt {
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.stat dd {
+  margin: 0.2rem 0 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-2);
+}
+
+/* ── Sections ────────────────────────────────────────────── */
+
+.flow {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.section {
+  position: relative;
+  min-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  /* Le texte s'aligne en haut de sa section, à hauteur du compagnon
+     figé en face. Centré verticalement, il flottait 90 à 180 px plus
+     bas et laissait un vide entre les deux ; l'espace restant tombe
+     entre deux sections, sous le filet de séparation. */
+  justify-content: flex-start;
+  padding: 4rem 0;
+  scroll-margin-top: 30vh;
+}
+
+.section + .section {
+  border-top: 1px solid var(--line);
+}
+
+/* Section 1 : elle partage sa ligne de départ avec le compagnon, le seul
+   panneau figé qui lui fait face. Sans cela, le texte de cette section
+   resterait 4 rem plus bas que le haut de la carte. */
+#photo {
+  padding-top: 0;
+}
+
+.marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+.section__kicker {
+  margin: 0 0 0.5rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.section__title {
+  margin: 0 0 0.9rem;
+  font-size: clamp(1.9rem, 4.5vw, 2.6rem);
+  letter-spacing: -0.02em;
+}
+
+.section__leads {
+  margin: 0 0 1.6rem;
+  max-width: 32rem;
+  font-size: 1.08rem;
+  color: var(--text);
+}
+
+.section__leads strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.section__body {
+  margin: 0 0 1rem;
+  max-width: 32rem;
+  color: var(--muted);
+}
+
+/* Sur téléphone, chaque section porte son propre compagnon, au-dessus de
+   son texte : la même carte, mais dans le flux du défilement. Au-dessus de
+   900 px ces cartes sont retirées — le compagnon unique reste le seul à
+   l'écran, figé dans sa colonne. */
+.companion--inline {
+  display: none;
+}
+
+/* ── Téléphone : le compagnon redevient un bloc du flux ──── */
+
+@media (max-width: 900px) {
+  /* L'écart sous l'en-tête est déjà pris par la marge du premier
+     compagnon : sans cette remise à zéro, les deux s'additionneraient. */
+  .hero {
+    margin-bottom: 0;
+  }
+
+  .layout {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding-bottom: 20vh;
+  }
+
+  /* Plus rien de figé : le compagnon s'inscrit dans le flux normal,
+     au-dessus du texte, et disparaît avec le défilement. Il ne peut
+     donc plus recouvrir la lecture. La marge négative l'étale sur toute
+     la largeur malgré le remplissage du conteneur.
+
+     `align-self` et `overflow` doivent être remis à zéro : dans la
+     grille, `align-self: start` empêche l'élément figé de s'étirer sur
+     toute la hauteur ; en colonne flexible, le même réglage réduit le
+     bloc à la largeur de son contenu et l'écrase. */
+  .companion {
+    order: -1;
+    position: static;
+    align-self: stretch;
+    max-height: none;
+    overflow: visible;
+    /* Plus de débord ni de marge négative : la carte occupe exactement la
+       largeur de la colonne de lecture, retrait latéral compris. Elle
+       devient une vraie carte, avec les mêmes arrondis et la même bordure
+       que celle de la colonne sur grand écran. */
+    margin: 0;
+    padding: 1.1rem;
+    border-radius: var(--radius);
+    border-width: 1px;
+    background: var(--panel);
+  }
+
+  /* Le compagnon de chaque section, posé au-dessus de son texte : même
+     habillage que celui du flux — pleine largeur, filet en bas — et même
+     espacement, pour que la carte et le texte se lisent comme un seul
+     bloc. `order: -1` le place avant le titre, `margin-bottom` l'en
+     détache. */
+  .companion--inline {
+    display: block;
+    margin-bottom: 1.6rem;
+  }
+
+  /* Section 1 : son compagnon est le panneau unique, dressé au-dessus du
+     flux. Il se lit comme les quatre autres — la carte ouvre la section,
+     puis le même espacement avant le titre — sauf qu'il se dégage aussi
+     de l'icône de défilement, qui reste ancrée en bas de l'en-tête. */
+  aside.companion {
+    margin-top: 3.5rem;
+    margin-bottom: 1.6rem;
+  }
+
+  .companion__label {
+    margin-bottom: 0.6rem;
+  }
+
+  .companion__stage {
+    max-height: none;
+    overflow: visible;
+  }
+
+  /* La carte ouvre sa section, qui se referme sur son texte. Sans
+     hauteur minimale, les sections courtes laissaient un vide au-dessus
+     d'elles — d'où l'impression que la carte n'arrivait qu'après une
+     zone vide, et que le contenu contextuel précédait sa section.
+     L'alignement en haut est déjà celui de l'écran large. */
+  .section {
+    min-height: 0;
+    padding: 2.5rem 0;
+    /* Le compagnon ne recouvre plus rien : le titre peut se poser
+       tout en haut de la fenêtre après un saut d'ancre. */
+    scroll-margin-top: 1rem;
+  }
+}
+
+/* ── Mouvement réduit : tout se fige ─────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .panel--front,
+  .scroll-cue__dot {
+    animation: none;
+  }
+
+  .scroll-cue__dot {
+    opacity: 1;
+    translate: -50% 0;
+  }
+
+  .view,
+  .choice {
+    transition: none;
+  }
+}
